@@ -1,1 +1,1 @@
-from .lms_pakage import LMS
+from .lms_synergy_library import LMS
