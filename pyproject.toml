@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lms_synergy_library"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
     {name = "Nikita Kovinjko", email = "kotorkovsciy@gmail.com"},
 ]
@@ -25,5 +25,5 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/kotorkovsciy/lms_synergy_library"
-"Bug Tracker" = "https://github.com/kotorkovsciy/lms_synergy_library/issues"
+"Homepage" = "https://github.com/kotorkovsciy/lms-synergy-library"
+"Bug Tracker" = "https://github.com/kotorkovsciy/lms-synergy-library/issues"
