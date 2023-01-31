@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lms_synergy_library"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
     {name = "Nikita Kovinjko", email = "kotorkovsciy@gmail.com"},
 ]
