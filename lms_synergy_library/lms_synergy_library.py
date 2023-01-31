@@ -48,7 +48,7 @@ class LMS:
 
         :Example:
 
-        >>> from Auth_LMS import LMS
+        >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
         >>> lms.get_name()
         'Student Demonstratsionnyiy'
@@ -73,7 +73,7 @@ class LMS:
 
         :Example:
 
-        >>> from Auth_LMS import LMS
+        >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
         >>> del lms
         """
@@ -89,7 +89,7 @@ class LMS:
 
         :Example:
 
-        >>> from Auth_LMS import LMS
+        >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
         >>> lms._LMS__sign()
         """
@@ -115,9 +115,9 @@ class LMS:
 
         :Example:
 
-        >>> from Auth_LMS import LMS
+        >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
-        >>> lms.cookies
+        >>> cookies = lms.cookies
         """
 
         return self.session.cookies.get_dict()
@@ -134,9 +134,9 @@ class LMS:
 
         :Example:
 
-        >>> from Auth_LMS import LMS
+        >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
-        >>> lms.get_cookies = {"PHPSESSID": "demo"}
+        >>> lms.cookies = {"PHPSESSID": "demo"}
         """
 
         self.session.cookies.update(cookies)
@@ -149,11 +149,11 @@ class LMS:
 
         :Example:
 
-        >>> from Auth_LMS import LMS
+        >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
-        >>> lms._get_soup_schedule()
-
-        <html>...</html>
+        >>> soup = lms._get_soup_schedule()
+        >>> clean_data.remove_many_spaces(soup.find("div", {"class": "user-name"}).text)
+        'Student Demonstratsionnyiy'
         """
 
         session: Session = Session()
@@ -172,10 +172,9 @@ class LMS:
 
         :Example:
 
-        >>> from Auth_LMS import LMS
+        >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
         >>> lms.verify()
-
         True
         """
 
@@ -191,10 +190,9 @@ class LMS:
 
         :Example:
 
-        >>> from Auth_LMS import LMS
+        >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
         >>> lms.get_name()
-
         'Student Demonstratsionnyiy'
         """
 
@@ -212,10 +210,9 @@ class LMS:
 
         :Example:
 
-        >>> from Auth_LMS import LMS
+        >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
         >>> lms.get_amount_messages()
-
         0
         """
 
@@ -241,10 +238,9 @@ class LMS:
 
         :Example:
 
-        >>> from Auth_LMS import LMS
+        >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
         >>> lms.get_amount_notifications()
-
         0
         """
 
@@ -270,15 +266,10 @@ class LMS:
 
         :Example:
 
-        >>> from Auth_LMS import LMS
+        >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
         >>> lms.get_info()
-
-        {
-            "name": "Student Demonstratsionnyiy",
-            "amount_messages": 0,
-            "amount_notifications": 0
-        }
+        {'name': 'Student Demonstratsionnyiy', 'amount_messages': 0, 'amount_notifications': 0}
         """
 
         return {
@@ -295,19 +286,20 @@ class LMS:
 
         :Example:
 
-        >>> from Auth_LMS import LMS
+        >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
-        >>> lms.get_schedule()
-
-        {
-            "date": "30.01.23, Mon" : {
-                "time": "08:30 - 10:00",
-                "name": "Linear Algebra",
-                "classroom": "Ауд. 101",
-                "type": "Лекция",
-                "teacher": "Иванов И.И."
-            }
-        }
+        >>> schedule = lms.get_schedule()
+        >>> # schedule
+        >>> # {
+        >>> #   "31.01.23, Tue": {
+        >>> #       "09:55 - 11:40": {
+        >>> #           "name": "Mathematics",
+        >>> #           "classroom": "D-101"
+        >>> #           "type": "lecture"
+        >>> #           "teacher": "Teacher Demonstratsionnyiy"
+        >>> #       },
+        >>> #   },
+        >>> # }
         """
 
         soup: bs = self._get_soup_schedule()
@@ -341,7 +333,6 @@ class LMS:
 
 
 if __name__ == "__main__":
-    lms = LMS(login="demo", password="demo")
-    print(lms.verify())
-    print(lms.get_info())
-    print(lms.get_schedule())
+    import doctest
+
+    doctest.testmod()
