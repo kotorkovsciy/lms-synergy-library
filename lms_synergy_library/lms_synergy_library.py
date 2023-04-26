@@ -15,6 +15,7 @@ class LMS:
     _URL_LOGIN: typing.Final[str] = "%s/user/login" % _URL
     _URL_SCHEDULE: typing.Final[str] = "%s/schedule/academ" % _URL
     _URL_NEWS: typing.Final[str] = "%s/announce" % _URL
+    _URL_EDUCATION: typing.Final[str] = "%s/student/up" % _URL
     _URLS_LEANGUAGES: typing.Final[dict] = {
         "ru": "%s/user/lng/1" % _URL,
         "en": "%s/user/lng/2" % _URL,
@@ -401,6 +402,83 @@ class LMS:
             )
 
         return news
+
+    def get_soup_disciplines(self) -> bs:
+        """Returns soup discipline
+
+        :return: Soup discipline
+        :rtype: bs4.BeautifulSoup
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> soup = lms.get_soup_disciplines()
+        >>> clean_data.remove_many_spaces(soup.find("div", {"class": "user-name"}).text)
+        'Student Demonstratsionnyiy'
+        """
+
+        self.session.get(self._URLS_LEANGUAGES[self.leanguage], cookies=self.cookies)
+
+        response: Response = self.session.get(self._URL_EDUCATION, cookies=self.cookies)
+
+        return bs(response.text, "html.parser")
+
+    def get_disciplines(self) -> list:
+        """Returns disciplines
+
+        :return: Disciplines
+        :rtype: list
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> disciplines = lms.get_disciplines()
+        >>> # disciplines
+        >>> # [
+        >>> #   {
+        >>> #       "title": "Title",
+        >>> #       "typeOfControl": "TypeOfControl",
+        >>> #       "currentScore": "CurrentScore",
+        >>> #       "finalGrade": "FinalGrade"
+        >>> #   },
+        >>> # ]
+        """
+
+        soup: bs = self.get_soup_disciplines()
+
+        disciplines: list = []
+
+        table = soup.find("tbody", {"class": "expanded"})
+
+        for tr in table.find_all("tr"):
+            if len(tr.find_all("td")) != 5:
+                continue
+            title: str = clean_data.remove_many_spaces(tr.find_all("td")[1].text)
+            typeOfControl: str = clean_data.remove_many_spaces(
+                tr.find_all("td")[2].text
+            )
+            currentScore: str = clean_data.remove_many_spaces(
+                tr.find_all("td")[3].text
+            )
+            if currentScore == "": currentScore = "-"
+
+            finalGrade: str = clean_data.remove_many_spaces(
+                tr.find_all("td")[4].text
+            )
+            if finalGrade == "": finalGrade = "-"
+
+            disciplines.append(
+                {
+                    "title": title,
+                    "typeOfControl": typeOfControl,
+                    "currentScore": currentScore,
+                    "finalGrade": finalGrade
+                }
+            )
+        
+        return disciplines
 
 
 if __name__ == "__main__":
