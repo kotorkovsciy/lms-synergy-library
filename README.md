@@ -30,6 +30,12 @@ lms.get_info()
 # get shedule
 lms.get_schedule()
 
+# get news
+lms.get_news()
+
+# get disciplines
+lms.get_disciplines()
+
 ```
 
 ## Contributing
