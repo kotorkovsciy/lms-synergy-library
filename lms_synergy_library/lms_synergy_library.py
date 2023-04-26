@@ -156,11 +156,9 @@ class LMS:
         'Student Demonstratsionnyiy'
         """
 
-        session: Session = Session()
+        self.session.get(self._URLS_LEANGUAGES[self.leanguage], cookies=self.cookies)
 
-        session.get(self._URLS_LEANGUAGES[self.leanguage], cookies=self.cookies)
-
-        response: Response = session.get(self._URL_SCHEDULE, cookies=self.cookies)
+        response: Response = self.session.get(self._URL_SCHEDULE, cookies=self.cookies)
 
         return bs(response.text, "html.parser")
 
