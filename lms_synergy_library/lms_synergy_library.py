@@ -14,6 +14,7 @@ class LMS:
     _URL: typing.Final[str] = "https://lms.synergy.ru"
     _URL_LOGIN: typing.Final[str] = "%s/user/login" % _URL
     _URL_SCHEDULE: typing.Final[str] = "%s/schedule/academ" % _URL
+    _URL_NEWS: typing.Final[str] = "%s/announce" % _URL
     _URLS_LEANGUAGES: typing.Final[dict] = {
         "ru": "%s/user/lng/1" % _URL,
         "en": "%s/user/lng/2" % _URL,
@@ -328,6 +329,78 @@ class LMS:
                 }
 
         return shedule
+
+    def _get_soup_news(self) -> bs:
+        """Returns soup news
+
+        :return: Soup news
+        :rtype: bs4.BeautifulSoup
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> soup = lms._get_soup_news()
+        >>> clean_data.remove_many_spaces(soup.find("div", {"class": "user-name"}).text)
+        'Student Demonstratsionnyiy'
+        """
+
+        self.session.get(self._URLS_LEANGUAGES[self.leanguage], cookies=self.cookies)
+
+        response: Response = self.session.get(self._URL_NEWS, cookies=self.cookies)
+
+        return bs(response.text, "html.parser")
+
+    def get_news(self) -> list:
+        """Returns news
+
+        :return: News
+        :rtype: list
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> news = lms.get_news()
+        >>> # news
+        >>> # [
+        >>> #   {
+        >>> #       "title": "Title",
+        >>> #       "description": "Description",
+        >>> #       "date": "Date",
+        >>> #       "link": "Link",
+        >>> #   },
+        >>> # ]
+        """
+
+        soup: bs = self._get_soup_news()
+
+        events_anons: bs = soup.find("div", {"class": "events-list rssNews"})
+
+        news: list = []
+
+        for event_anons in events_anons.find_all("div", {"class": "item"}):
+            title: str = clean_data.remove_many_spaces(
+                event_anons.find("h3").text
+            )
+            description: str = clean_data.remove_many_spaces(
+                event_anons.find("div", {"class": "awrap"}).text
+            )
+            date: str = clean_data.remove_many_spaces(
+                event_anons.find("div", {"class": "meta"}).text
+            )
+            link: str = event_anons.find("a", {"class": "more"})["href"]
+
+            news.append(
+                {
+                    "title": title,
+                    "description": description,
+                    "date": date,
+                    "link": link,
+                }
+            )
+
+        return news
 
 
 if __name__ == "__main__":
