@@ -11,7 +11,7 @@ class LMS:
     _URL_SCHEDULE: typing.Final[str] = "%s/schedule/academ" % _URL
     _URL_NEWS: typing.Final[str] = "%s/announce" % _URL
     _URL_EDUCATION: typing.Final[str] = "%s/student/up" % _URL
-    _URLS_LEANGUAGES: typing.Final[dict] = {
+    _URLS_LANGUAGES: typing.Final[dict] = {
         "ru": "%s/user/lng/1" % _URL,
         "en": "%s/user/lng/2" % _URL,
     }
@@ -24,7 +24,7 @@ class LMS:
         password: str = "demo",
         proxy: dict = None,
         headers: dict = None,
-        leanguage: str = "en",
+        language: str = "en",
     ) -> None:
         """Init LMS
 
@@ -32,13 +32,13 @@ class LMS:
         :param password: Login
         :param proxy: Proxy
         :param headers: Headers
-        :param leanguage: Leanguage
+        :param language: Language
 
         :type login: str
         :type password: str
         :type proxy: dict
         :type headers: dict
-        :type leanguage: str
+        :type language: str
 
         :return: None
         :rtype: None
@@ -56,9 +56,9 @@ class LMS:
         self.proxy = proxy
         self.headers = headers
 
-        if leanguage not in self._URLS_LEANGUAGES:
-            raise ValueError("Leanguage not found")
-        self.leanguage = leanguage
+        if language not in self._URLS_LANGUAGES:
+            raise ValueError("language not found")
+        self.language = language
 
         self.__sign()
 
@@ -101,7 +101,7 @@ class LMS:
         self.session = Session()
         self.session.headers.update(headers)
         self.session.post(self._URL_LOGIN, data=data, proxies=proxies)
-        self.session.get(self._URLS_LEANGUAGES[self.leanguage], proxies=proxies)
+        self.session.get(self._URLS_LANGUAGES[self.language], proxies=proxies)
 
     @property
     def cookies(self) -> dict:
@@ -153,7 +153,7 @@ class LMS:
         'Student Demonstratsionnyiy'
         """
 
-        self.session.get(self._URLS_LEANGUAGES[self.leanguage], cookies=self.cookies)
+        self.session.get(self._URLS_LANGUAGES[self.language], cookies=self.cookies)
 
         response: Response = self.session.get(self._URL_SCHEDULE, cookies=self.cookies)
 
@@ -218,7 +218,7 @@ class LMS:
 
         soup: bs = self._get_soup_schedule()
 
-        amount_messages: str = soup.find("a", title=titles[self.leanguage])
+        amount_messages: str = soup.find("a", title=titles[self.language])
 
         if amount_messages is None:
             return 0
@@ -246,7 +246,7 @@ class LMS:
 
         soup: bs = self._get_soup_schedule()
 
-        amount_notifications: str = soup.find("a", title=titles[self.leanguage])
+        amount_notifications: str = soup.find("a", title=titles[self.language])
 
         if amount_notifications is None:
             return 0
@@ -341,7 +341,7 @@ class LMS:
         'Student Demonstratsionnyiy'
         """
 
-        self.session.get(self._URLS_LEANGUAGES[self.leanguage], cookies=self.cookies)
+        self.session.get(self._URLS_LANGUAGES[self.language], cookies=self.cookies)
 
         response: Response = self.session.get(self._URL_NEWS, cookies=self.cookies)
 
@@ -413,7 +413,7 @@ class LMS:
         'Student Demonstratsionnyiy'
         """
 
-        self.session.get(self._URLS_LEANGUAGES[self.leanguage], cookies=self.cookies)
+        self.session.get(self._URLS_LANGUAGES[self.language], cookies=self.cookies)
 
         response: Response = self.session.get(self._URL_EDUCATION, cookies=self.cookies)
 
