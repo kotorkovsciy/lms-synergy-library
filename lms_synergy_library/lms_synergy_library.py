@@ -1,13 +1,8 @@
 from requests import Response, Session
 from bs4 import BeautifulSoup as bs
 from fake_useragent import UserAgent
+from utils import clean_data
 import typing
-
-
-class clean_data:
-    @staticmethod
-    def remove_many_spaces(string):
-        return " ".join(string.split())
 
 
 class LMS:
