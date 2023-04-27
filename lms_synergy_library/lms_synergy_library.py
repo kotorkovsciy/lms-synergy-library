@@ -3,20 +3,10 @@ from bs4 import BeautifulSoup as bs
 from fake_useragent import UserAgent
 from utils import clean_data
 from exceptions import LanguageNotFoundError
-import typing
+from constants import URL_EDUCATION, URL_LOGIN, URL_NEWS, URL_SCHEDULE, URLS_LANGUAGES
 
 
 class LMS:
-    _URL: typing.Final[str] = "https://lms.synergy.ru"
-    _URL_LOGIN: typing.Final[str] = "%s/user/login" % _URL
-    _URL_SCHEDULE: typing.Final[str] = "%s/schedule/academ" % _URL
-    _URL_NEWS: typing.Final[str] = "%s/announce" % _URL
-    _URL_EDUCATION: typing.Final[str] = "%s/student/up" % _URL
-    _URLS_LANGUAGES: typing.Final[dict] = {
-        "ru": "%s/user/lng/1" % _URL,
-        "en": "%s/user/lng/2" % _URL,
-    }
-
     session: Session = None
 
     def __init__(
@@ -57,7 +47,7 @@ class LMS:
         self.proxy = proxy
         self.headers = headers
 
-        if language not in self._URLS_LANGUAGES:
+        if language not in URLS_LANGUAGES:
             raise LanguageNotFoundError("No such language %s" % language)
         self.language = language
 
@@ -101,8 +91,8 @@ class LMS:
 
         self.session = Session()
         self.session.headers.update(headers)
-        self.session.post(self._URL_LOGIN, data=data, proxies=proxies)
-        self.session.get(self._URLS_LANGUAGES[self.language], proxies=proxies)
+        self.session.post(URL_LOGIN, data=data, proxies=proxies)
+        self.session.get(URLS_LANGUAGES[self.language], proxies=proxies)
 
     @property
     def cookies(self) -> dict:
@@ -154,9 +144,9 @@ class LMS:
         'Student Demonstratsionnyiy'
         """
 
-        self.session.get(self._URLS_LANGUAGES[self.language], cookies=self.cookies)
+        self.session.get(URLS_LANGUAGES[self.language], cookies=self.cookies)
 
-        response: Response = self.session.get(self._URL_SCHEDULE, cookies=self.cookies)
+        response: Response = self.session.get(URL_SCHEDULE, cookies=self.cookies)
 
         return bs(response.text, "html.parser")
 
@@ -342,9 +332,9 @@ class LMS:
         'Student Demonstratsionnyiy'
         """
 
-        self.session.get(self._URLS_LANGUAGES[self.language], cookies=self.cookies)
+        self.session.get(URLS_LANGUAGES[self.language], cookies=self.cookies)
 
-        response: Response = self.session.get(self._URL_NEWS, cookies=self.cookies)
+        response: Response = self.session.get(URL_NEWS, cookies=self.cookies)
 
         return bs(response.text, "html.parser")
 
@@ -414,9 +404,9 @@ class LMS:
         'Student Demonstratsionnyiy'
         """
 
-        self.session.get(self._URLS_LANGUAGES[self.language], cookies=self.cookies)
+        self.session.get(URLS_LANGUAGES[self.language], cookies=self.cookies)
 
-        response: Response = self.session.get(self._URL_EDUCATION, cookies=self.cookies)
+        response: Response = self.session.get(URL_EDUCATION, cookies=self.cookies)
 
         return bs(response.text, "html.parser")
 
