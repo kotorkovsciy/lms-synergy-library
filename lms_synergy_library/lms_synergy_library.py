@@ -2,6 +2,7 @@ from requests import Response, Session
 from bs4 import BeautifulSoup as bs
 from fake_useragent import UserAgent
 from utils import clean_data
+from exceptions import LanguageNotFoundError
 import typing
 
 
@@ -57,7 +58,7 @@ class LMS:
         self.headers = headers
 
         if language not in self._URLS_LANGUAGES:
-            raise ValueError("language not found")
+            raise LanguageNotFoundError("No such language %s" % language)
         self.language = language
 
         self.__sign()
