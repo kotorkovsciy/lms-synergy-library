@@ -36,6 +36,9 @@ lms.get_news()
 # get disciplines
 lms.get_disciplines()
 
+# get amount unverified work
+lms.get_amount_unverified_work()
+
 ```
 
 ## Contributing
