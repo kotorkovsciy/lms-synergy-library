@@ -2,7 +2,7 @@ from requests import Response, Session
 from bs4 import BeautifulSoup as bs
 from fake_useragent import UserAgent
 from utils import clean_data
-from exceptions import LanguageNotFoundError
+from exceptions import LanguageNotFoundError, UserIsNotTeacherError
 from constants import URL_EDUCATION, URL_LOGIN, URL_NEWS, URL_SCHEDULE, URLS_LANGUAGES
 from typing import Dict, List
 
@@ -95,6 +95,7 @@ class LMS:
         self.session.headers.update(headers)
         self.session.post(URL_LOGIN, data=data, proxies=proxies)
         self.session.get(URLS_LANGUAGES[self.language], proxies=proxies)
+        self.type_user = self.get_type_user()
 
     def get_type_user(self) -> str:
         """Returns type user
@@ -285,6 +286,38 @@ class LMS:
 
         return int(clean_data.remove_many_spaces(amount_notifications.text))
 
+    def get_amount_unverified_work(self) -> int:
+        """Returns amount unverified work
+
+        :return: Amount unverified work
+        :rtype: int
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> # lms.get_amount_unverified_work()
+        >>> # error - if user is not teacher
+        >>> # 0 - if user is teacher and amount unverified work is 0
+        """
+
+        soup: bs = self._get_soup_schedule()
+
+        if self.type_user not in ["teacher", "преподаватель"]:
+            raise UserIsNotTeacherError("User is not teacher")
+
+        titles: dict = {
+            "ru": "Требуют проверки",
+            "en": "Require verification",
+        }
+
+        amount_unverified_work: str = soup.find("a", title=titles[self.language])
+
+        if amount_unverified_work is None:
+            return 0
+
+        return int(clean_data.remove_many_spaces(amount_unverified_work.text))
+
     def get_info(self) -> dict:
         """Returns information about user
 
@@ -316,6 +349,49 @@ class LMS:
         >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
         >>> schedule = lms.get_schedule()
+        >>> # schedule # schedule for student
+        >>> # {
+        >>> #   "31.01.23, Tue": {
+        >>> #       "09:55 - 11:40": {
+        >>> #           "name": "Mathematics",
+        >>> #           "classroom": "D-101"
+        >>> #           "type": "lecture"
+        >>> #           "teacher": "Teacher Demonstratsionnyiy"
+        >>> #       },
+        >>> #   },
+        >>> # }
+        >>> # schedule # schedule for teacher
+        >>> # {
+        >>> #   "31.01.23, Tue": {
+        >>> #       "09:55 - 11:40": {
+        >>> #           "name": "Mathematics",
+        >>> #           "Group": "it-21"
+        >>> #           "classroom": "D-101"
+        >>> #           "type_lesson": "lecture"
+        >>> #       },
+        >>> #   },
+        >>> # }
+        """
+        types: dict = {
+            "студент": "student",
+            "преподаватель": "teacher",
+            "student": "student",
+            "teacher": "teacher"
+        }
+
+        return eval("self._get_%s_schedule" % types[self.type_user])()
+
+    def _get_student_schedule(self) -> dict:
+        """Returns schedule for student
+
+        :return: Schedule
+        :rtype: list
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> schedule = lms._get_student_schedule()
         >>> # schedule
         >>> # {
         >>> #   "31.01.23, Tue": {
@@ -354,6 +430,61 @@ class LMS:
                     "classroom": classroom,
                     "type": type_,
                     "teacher": teacher,
+                }
+
+        return shedule
+
+    def _get_teacher_schedule(self) -> dict:
+        """Returns schedule for student
+
+        :return: Schedule
+        :rtype: list
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> schedule = lms._get_teacher_schedule()
+        >>> # schedule
+        >>> # {
+        >>> #   "31.01.23, Tue": {
+        >>> #       "09:55 - 11:40": {
+        >>> #           "name": "Mathematics",
+        >>> #           "Group": "it-21"
+        >>> #           "classroom": "D-101"
+        >>> #           "type_lesson": "lecture"
+        >>> #       },
+        >>> #   },
+        >>> # }
+        """
+
+        soup: bs = self._get_soup_schedule()
+
+        table: bs = soup.find("table", {"class": "table-list v-scrollable"})
+        shedule: dict = {}
+
+        for tr in table.find("tbody").find_all("tr"):
+            if len(tr.find_all("td")) == 1:
+                return shedule
+            if tr.find("th"):
+                date: str = clean_data.remove_many_spaces(tr.find("th").text)
+                shedule[date] = {}
+            else:
+                time: str = clean_data.remove_many_spaces(tr.find_all("td")[0].text)
+                name: str = clean_data.remove_many_spaces(tr.find_all("td")[1].text)
+                group: str = clean_data.remove_many_spaces(tr.find_all("td")[2].text)
+                classroom: str = clean_data.remove_many_spaces(
+                    tr.find_all("td")[3].text
+                )
+                type_lesson: str = clean_data.remove_many_spaces(
+                    tr.find_all("td")[4].text
+                )
+
+                shedule[date][time] = {
+                    "name": name,
+                    "group": group,
+                    "classroom": classroom,
+                    "type_lesson": type_lesson,
                 }
 
         return shedule
