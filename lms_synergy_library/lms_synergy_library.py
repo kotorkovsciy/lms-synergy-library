@@ -4,10 +4,12 @@ from fake_useragent import UserAgent
 from utils import clean_data
 from exceptions import LanguageNotFoundError
 from constants import URL_EDUCATION, URL_LOGIN, URL_NEWS, URL_SCHEDULE, URLS_LANGUAGES
+from typing import Dict, List
 
 
 class LMS:
     session: Session = None
+    type_user: str = None
 
     def __init__(
         self,
@@ -93,6 +95,45 @@ class LMS:
         self.session.headers.update(headers)
         self.session.post(URL_LOGIN, data=data, proxies=proxies)
         self.session.get(URLS_LANGUAGES[self.language], proxies=proxies)
+
+    def get_type_user(self) -> str:
+        """Returns type user
+
+        :return: Type user
+        :rtype: str
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> lms.get_type_user()
+        'student'
+        """
+
+        if not self.type_user:
+            soup: bs = self._get_soup_schedule()
+            all_roles: bs = soup.find("div", {"class": "drop-menu drop-select small"}).find("ul")
+            
+            drop_menu_label: bs = soup.find("div", {"id": "switch-accounts"}).find("div", {"class": "drop-menu-label"})
+            current_type_user: str = drop_menu_label.find("span", {"class": "title"}).text
+
+            roles: List[Dict[str, str]] = []
+
+            for li in all_roles.find_all("li"):
+                if li.find("b"):
+                    roles.append({"name": li.find("b").text.lower()})
+                elif li.find("a"):
+                    roles[-1]["type"] = li.find("a").text.lower()
+
+            for role in roles:
+                if role["name"] == current_type_user:
+                    self.type_user = role["type"]
+                    break
+
+            if not self.type_user:
+                self.type_user = roles[0]["name"]
+
+        return self.type_user
 
     @property
     def cookies(self) -> dict:
