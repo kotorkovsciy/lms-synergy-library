@@ -561,7 +561,7 @@ class LMS:
 
         return news
 
-    def get_soup_disciplines(self) -> bs:
+    def _get_soup_disciplines(self) -> bs:
         """Returns soup discipline
 
         :return: Soup discipline
@@ -571,7 +571,7 @@ class LMS:
 
         >>> from lms_synergy_library import LMS
         >>> lms = LMS(login="demo", password="demo")
-        >>> soup = lms.get_soup_disciplines()
+        >>> soup = lms._get_soup_disciplines()
         >>> clean_data.remove_many_spaces(soup.find("div", {"class": "user-name"}).text)
         'Student Demonstratsionnyiy'
         """
@@ -604,7 +604,7 @@ class LMS:
         >>> # ]
         """
 
-        soup: bs = self.get_soup_disciplines()
+        soup: bs = self._get_soup_disciplines()
 
         disciplines: list = []
 
