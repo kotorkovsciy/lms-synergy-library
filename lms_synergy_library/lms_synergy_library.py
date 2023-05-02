@@ -115,7 +115,8 @@ class LMS:
             soup: bs = SoupLms.get_soup_schedule(
                 session=self.session,
                 language=self.language,
-                cookies=self.cookies
+                cookies=self.cookies,
+                proxies=self.proxy
             )
 
             all_roles: bs = soup.find("div", {"class": "drop-menu drop-select small"}).find("ul")
@@ -193,7 +194,8 @@ class LMS:
         soup: bs = SoupLms.get_soup_schedule(
             session=self.session,
             language=self.language,
-            cookies=self.cookies
+            cookies=self.cookies,
+            proxies=self.proxy
         )
 
         return soup.find("div", {"class": "user-name"}) is not None
@@ -215,7 +217,8 @@ class LMS:
         soup: bs = SoupLms.get_soup_schedule(
             session=self.session,
             language=self.language,
-            cookies=self.cookies
+            cookies=self.cookies,
+            proxies=self.proxy
         )
 
         name: str = soup.find("div", {"class": "user-name"}).text
@@ -244,7 +247,8 @@ class LMS:
         soup: bs = SoupLms.get_soup_schedule(
             session=self.session,
             language=self.language,
-            cookies=self.cookies
+            cookies=self.cookies,
+            proxies=self.proxy
         )
 
         amount_messages: str = soup.find("a", title=titles[self.language])
@@ -276,7 +280,8 @@ class LMS:
         soup: bs = SoupLms.get_soup_schedule(
             session=self.session,
             language=self.language,
-            cookies=self.cookies
+            cookies=self.cookies,
+            proxies=self.proxy
         )
 
         amount_notifications: str = soup.find("a", title=titles[self.language])
@@ -304,7 +309,8 @@ class LMS:
         soup: bs = SoupLms.get_soup_schedule(
             session=self.session,
             language=self.language,
-            cookies=self.cookies
+            cookies=self.cookies,
+            proxies=self.proxy
         )
 
         if self.type_user not in ["teacher", "преподаватель"]:
@@ -412,7 +418,8 @@ class LMS:
         soup: bs = SoupLms.get_soup_schedule(
             session=self.session,
             language=self.language,
-            cookies=self.cookies
+            cookies=self.cookies,
+            proxies=self.proxy
         )
 
         table: bs = soup.find("table", {"class": "table-list v-scrollable"})
@@ -469,7 +476,8 @@ class LMS:
         soup: bs = SoupLms.get_soup_schedule(
             session=self.session,
             language=self.language,
-            cookies=self.cookies
+            cookies=self.cookies,
+            proxies=self.proxy
         )
 
         table: bs = soup.find("table", {"class": "table-list v-scrollable"})
@@ -526,7 +534,8 @@ class LMS:
         soup: bs = SoupLms.get_soup_news(
             session=self.session,
             language=self.language,
-            cookies=self.cookies
+            cookies=self.cookies,
+            proxies=self.proxy
         )
 
         events_anons: bs = soup.find("div", {"class": "events-list rssNews"})
@@ -581,7 +590,8 @@ class LMS:
         soup: bs = SoupLms.get_soup_disciplines(
             session=self.session,
             language=self.language,
-            cookies=self.cookies
+            cookies=self.cookies,
+            proxies=self.proxy
         )
 
         disciplines: list = []
