@@ -690,6 +690,70 @@ class LMS:
 
         return personal_curators
 
+    def get_tutors(self) -> list:
+        """Returns tutors
+
+        :return: Tutors
+        :rtype: list
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> tutors = lms.get_tutors()
+        >>> # tutors
+        >>> # [
+        >>> #   {
+        >>> #       "name": "",
+        >>> #       "phones": [],
+        >>> #       "emails": []
+        >>> #   },
+        >>> # ]
+        """
+
+        if self.type_user not in ["student", "студент"]:
+            raise UserIsNotStudentError("User is not student")
+
+        soup: bs = SoupLms.get_soup_schedule(
+            session=self.session,
+            language=self.language,
+            cookies=self.cookies,
+            proxies=self.proxy
+        )
+
+        curator_main: bs = soup.find("div", {"id": "curators"})
+        curator_list: bs = curator_main.find("ul", {"class": "curatorList"})
+        tutors: list = []
+
+        if curator_list is None: return []
+
+        for li in curator_list.find_all("li"):
+            name: str = li.find("span", {"class": "curatorName"}).text
+            phones: list = []
+            emails: list = []
+
+            phone_icons = li.find_all('i', {'class': ['icon-helpdesk']})
+            email_icon = li.find('i', {'class': ['icon-mail']})
+
+            for icon in phone_icons:
+                phone = icon.find_next_sibling(string=True).strip()
+                phones.append(phone)
+
+            if email_icon:
+                email_link = email_icon.find_next_sibling('a')
+                email = email_link.get('href').replace('mailto:', '').strip()
+                emails.append(email)
+
+            tutors.append(
+                {
+                    "name": name,
+                    "phones": phones,
+                    "emails": emails
+                }
+            )
+
+        return tutors
+
 
 if __name__ == "__main__":
     import doctest
