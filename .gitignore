@@ -2,3 +2,4 @@ lms_synergy_library.egg-info/
 dist/
 venv/
 __pycache__/
+.idea/
