@@ -306,15 +306,15 @@ class LMS:
         >>> # 0 - if user is teacher and amount unverified work is 0
         """
 
+        if self.type_user not in ["teacher", "преподаватель"]:
+            raise UserIsNotTeacherError("User is not teacher")
+
         soup: bs = SoupLms.get_soup_schedule(
             session=self.session,
             language=self.language,
             cookies=self.cookies,
             proxies=self.proxy
         )
-
-        if self.type_user not in ["teacher", "преподаватель"]:
-            raise UserIsNotTeacherError("User is not teacher")
 
         titles: dict = {
             "ru": "Требуют проверки",
