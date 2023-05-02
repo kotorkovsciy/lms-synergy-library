@@ -3,3 +3,6 @@ class LanguageNotFoundError(Exception):
 
 class UserIsNotTeacherError(Exception):
     pass
+
+class UserIsNotStudentError(Exception):
+    pass
