@@ -2,7 +2,7 @@ from requests import Session
 from bs4 import BeautifulSoup as bs
 from fake_useragent import UserAgent
 from utils import clean_data, SoupLms
-from exceptions import LanguageNotFoundError, UserIsNotTeacherError
+from exceptions import LanguageNotFoundError, UserIsNotTeacherError, UserIsNotStudentError
 from constants import URL_LOGIN, URLS_LANGUAGES
 from typing import Dict, List
 
@@ -625,6 +625,70 @@ class LMS:
             )
         
         return disciplines
+
+    def get_pesonal_curators(self) -> list:
+        """Returns personal curators
+
+        :return: Personal curators
+        :rtype: list
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> pesonal_curators = lms.get_pesonal_curators()
+        >>> # pesonal_curators
+        >>> # [
+        >>> #   {
+        >>> #       "name": "",
+        >>> #       "phones": [],
+        >>> #       "emails": []
+        >>> #   },
+        >>> # ]
+        """
+
+        if self.type_user not in ["student", "студент"]:
+            raise UserIsNotStudentError("User is not student")
+
+        soup: bs = SoupLms.get_soup_schedule(
+            session=self.session,
+            language=self.language,
+            cookies=self.cookies,
+            proxies=self.proxy
+        )
+
+        curator_main: bs = soup.find("div", {"id": "curatorMain"})
+        curator_list: bs = curator_main.find("ul", {"class": "curatorList"})
+        personal_curators: list = []
+
+        if curator_list is None: return []
+
+        for li in curator_list.find_all("li"):
+            name: str = li.find("span", {"class": "curatorName"}).text
+            phones: list = []
+            emails: list = []
+
+            phone_icons = li.find_all('i', {'class': ['icon-helpdesk']})
+            email_icon = li.find('i', {'class': ['icon-mail']})
+
+            for icon in phone_icons:
+                phone = icon.find_next_sibling(string=True).strip()
+                phones.append(phone)
+
+            if email_icon:
+                email_link = email_icon.find_next_sibling('a')
+                email = email_link.get('href').replace('mailto:', '').strip()
+                emails.append(email)
+
+            personal_curators.append(
+                {
+                    "name": name,
+                    "phones": phones,
+                    "emails": emails
+                }
+            )
+
+        return personal_curators
 
 
 if __name__ == "__main__":
