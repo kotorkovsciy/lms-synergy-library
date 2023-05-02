@@ -1,9 +1,9 @@
-from requests import Response, Session
+from requests import Session
 from bs4 import BeautifulSoup as bs
 from fake_useragent import UserAgent
-from utils import clean_data
+from utils import clean_data, SoupLms
 from exceptions import LanguageNotFoundError, UserIsNotTeacherError
-from constants import URL_EDUCATION, URL_LOGIN, URL_NEWS, URL_SCHEDULE, URLS_LANGUAGES
+from constants import URL_LOGIN, URLS_LANGUAGES
 from typing import Dict, List
 
 
@@ -112,7 +112,12 @@ class LMS:
         """
 
         if not self.type_user:
-            soup: bs = self._get_soup_schedule()
+            soup: bs = SoupLms.get_soup_schedule(
+                session=self.session,
+                language=self.language,
+                cookies=self.cookies
+            )
+
             all_roles: bs = soup.find("div", {"class": "drop-menu drop-select small"}).find("ul")
             
             drop_menu_label: bs = soup.find("div", {"id": "switch-accounts"}).find("div", {"class": "drop-menu-label"})
@@ -171,27 +176,6 @@ class LMS:
 
         self.session.cookies.update(cookies)
 
-    def _get_soup_schedule(self) -> bs:
-        """Returns soup schedule
-
-        :return: Soup schedule
-        :rtype: bs4.BeautifulSoup
-
-        :Example:
-
-        >>> from lms_synergy_library import LMS
-        >>> lms = LMS(login="demo", password="demo")
-        >>> soup = lms._get_soup_schedule()
-        >>> clean_data.remove_many_spaces(soup.find("div", {"class": "user-name"}).text)
-        'Student Demonstratsionnyiy'
-        """
-
-        self.session.get(URLS_LANGUAGES[self.language], cookies=self.cookies)
-
-        response: Response = self.session.get(URL_SCHEDULE, cookies=self.cookies)
-
-        return bs(response.text, "html.parser")
-
     def verify(self) -> bool:
         """Verify auth
 
@@ -206,7 +190,11 @@ class LMS:
         True
         """
 
-        soup: bs = self._get_soup_schedule()
+        soup: bs = SoupLms.get_soup_schedule(
+            session=self.session,
+            language=self.language,
+            cookies=self.cookies
+        )
 
         return soup.find("div", {"class": "user-name"}) is not None
 
@@ -224,7 +212,11 @@ class LMS:
         'Student Demonstratsionnyiy'
         """
 
-        soup: bs = self._get_soup_schedule()
+        soup: bs = SoupLms.get_soup_schedule(
+            session=self.session,
+            language=self.language,
+            cookies=self.cookies
+        )
 
         name: str = soup.find("div", {"class": "user-name"}).text
 
@@ -249,7 +241,11 @@ class LMS:
             "en": "Private messages",
         }
 
-        soup: bs = self._get_soup_schedule()
+        soup: bs = SoupLms.get_soup_schedule(
+            session=self.session,
+            language=self.language,
+            cookies=self.cookies
+        )
 
         amount_messages: str = soup.find("a", title=titles[self.language])
 
@@ -277,7 +273,11 @@ class LMS:
             "en": "Notifications",
         }
 
-        soup: bs = self._get_soup_schedule()
+        soup: bs = SoupLms.get_soup_schedule(
+            session=self.session,
+            language=self.language,
+            cookies=self.cookies
+        )
 
         amount_notifications: str = soup.find("a", title=titles[self.language])
 
@@ -301,7 +301,11 @@ class LMS:
         >>> # 0 - if user is teacher and amount unverified work is 0
         """
 
-        soup: bs = self._get_soup_schedule()
+        soup: bs = SoupLms.get_soup_schedule(
+            session=self.session,
+            language=self.language,
+            cookies=self.cookies
+        )
 
         if self.type_user not in ["teacher", "преподаватель"]:
             raise UserIsNotTeacherError("User is not teacher")
@@ -405,7 +409,11 @@ class LMS:
         >>> # }
         """
 
-        soup: bs = self._get_soup_schedule()
+        soup: bs = SoupLms.get_soup_schedule(
+            session=self.session,
+            language=self.language,
+            cookies=self.cookies
+        )
 
         table: bs = soup.find("table", {"class": "table-list v-scrollable"})
         shedule: dict = {}
@@ -458,7 +466,11 @@ class LMS:
         >>> # }
         """
 
-        soup: bs = self._get_soup_schedule()
+        soup: bs = SoupLms.get_soup_schedule(
+            session=self.session,
+            language=self.language,
+            cookies=self.cookies
+        )
 
         table: bs = soup.find("table", {"class": "table-list v-scrollable"})
         shedule: dict = {}
@@ -489,27 +501,6 @@ class LMS:
 
         return shedule
 
-    def _get_soup_news(self) -> bs:
-        """Returns soup news
-
-        :return: Soup news
-        :rtype: bs4.BeautifulSoup
-
-        :Example:
-
-        >>> from lms_synergy_library import LMS
-        >>> lms = LMS(login="demo", password="demo")
-        >>> soup = lms._get_soup_news()
-        >>> clean_data.remove_many_spaces(soup.find("div", {"class": "user-name"}).text)
-        'Student Demonstratsionnyiy'
-        """
-
-        self.session.get(URLS_LANGUAGES[self.language], cookies=self.cookies)
-
-        response: Response = self.session.get(URL_NEWS, cookies=self.cookies)
-
-        return bs(response.text, "html.parser")
-
     def get_news(self) -> list:
         """Returns news
 
@@ -532,7 +523,11 @@ class LMS:
         >>> # ]
         """
 
-        soup: bs = self._get_soup_news()
+        soup: bs = SoupLms.get_soup_news(
+            session=self.session,
+            language=self.language,
+            cookies=self.cookies
+        )
 
         events_anons: bs = soup.find("div", {"class": "events-list rssNews"})
 
@@ -561,27 +556,6 @@ class LMS:
 
         return news
 
-    def _get_soup_disciplines(self) -> bs:
-        """Returns soup discipline
-
-        :return: Soup discipline
-        :rtype: bs4.BeautifulSoup
-
-        :Example:
-
-        >>> from lms_synergy_library import LMS
-        >>> lms = LMS(login="demo", password="demo")
-        >>> soup = lms._get_soup_disciplines()
-        >>> clean_data.remove_many_spaces(soup.find("div", {"class": "user-name"}).text)
-        'Student Demonstratsionnyiy'
-        """
-
-        self.session.get(URLS_LANGUAGES[self.language], cookies=self.cookies)
-
-        response: Response = self.session.get(URL_EDUCATION, cookies=self.cookies)
-
-        return bs(response.text, "html.parser")
-
     def get_disciplines(self) -> list:
         """Returns disciplines
 
@@ -604,7 +578,11 @@ class LMS:
         >>> # ]
         """
 
-        soup: bs = self._get_soup_disciplines()
+        soup: bs = SoupLms.get_soup_disciplines(
+            session=self.session,
+            language=self.language,
+            cookies=self.cookies
+        )
 
         disciplines: list = []
 
