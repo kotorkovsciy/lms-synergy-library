@@ -42,6 +42,9 @@ lms.get_amount_unverified_work()
 # get pesonal curators
 lms.get_pesonal_curators()
 
+# get tutors
+lms.get_tutors()
+
 ```
 
 ## Contributing
