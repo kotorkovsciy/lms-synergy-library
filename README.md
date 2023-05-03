@@ -45,6 +45,9 @@ lms.get_pesonal_curators()
 # get tutors
 lms.get_tutors()
 
+# get notifications
+lms.get_notify()
+
 ```
 
 ## Contributing
