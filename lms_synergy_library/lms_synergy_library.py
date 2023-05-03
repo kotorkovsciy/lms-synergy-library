@@ -791,7 +791,7 @@ class LMS:
                 page=page
             )
 
-            table: bs = soup.find("table", {"table-list dataTable": ""})
+            table: bs = soup.find("table", {"class": "table-list dataTable"})
 
             for tr in table.find("tbody").find_all("tr"):
                 if len(tr.find_all("td")) == 1:
@@ -815,6 +815,68 @@ class LMS:
                 )
 
         return notify
+
+    def get_notify_archive(self) -> list:
+        """Returns notifications archive
+
+        :return: Notifications archive
+        :rtype: list
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> notify_archive = lms.get_notify_archive()
+        >>> # notify_archive
+        >>> # [
+        >>> #   {
+        >>> #       "discipline": "Discipline",
+        >>> #       "teacher": "Teacher",
+        >>> #       "event": "Event",
+        >>> #       "current_score": "Current_score",
+        >>> #       "message": "Message"
+        >>> #   },
+        >>> # ]
+        """
+
+        amount_pages: int = SoupLms.get_amount_pages_notify_archive(
+            self.session, self.language, self.cookies, self.proxy
+        )
+        notify_archive: list = []
+
+        for page in range(1, amount_pages):
+            soup: bs = SoupLms.get_soup_notify_archive(
+                session=self.session,
+                language=self.language,
+                cookies=self.cookies,
+                proxies=self.proxy,
+                page=page
+            )
+
+            table: bs = soup.find("table", {"class": "table-list dataTable"})
+
+            for tr in table.find("tbody").find_all("tr"):
+                if len(tr.find_all("td")) == 1:
+                    return notify_archive
+                if tr.find_all("td")[4].text[-1] == "0":
+                    continue
+                discipline: str = tr.find_all("td")[0].text
+                teacher: str = tr.find_all("td")[1].text
+                event: str = tr.find_all("td")[2].text
+                current_score: str = tr.find_all("td")[3].text
+                message: str = tr.find_all("td")[4].text
+
+                notify_archive.append(
+                    {
+                        "discipline": discipline,
+                        "teacher": teacher,
+                        "event": event,
+                        "current_score": current_score,
+                        "message": message
+                    }
+                )
+
+        return notify_archive
 
 
 if __name__ == "__main__":
