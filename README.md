@@ -48,6 +48,9 @@ lms.get_tutors()
 # get notifications
 lms.get_notify()
 
+# get notifications archive
+lms.get_notify_archive()
+
 ```
 
 ## Contributing
