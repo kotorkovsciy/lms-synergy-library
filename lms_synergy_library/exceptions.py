@@ -6,3 +6,6 @@ class UserIsNotTeacherError(Exception):
 
 class UserIsNotStudentError(Exception):
     pass
+
+class PageNotExist(Exception):
+    pass
