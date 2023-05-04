@@ -8,6 +8,8 @@ URL_NEWS: Final[str] = "%s/announce" % URL
 URL_EDUCATION: Final[str] = "%s/student/up" % URL
 URL_NOTIFY: Final[str] = "%s/student/notifications" % URL
 URL_NOTIFY_ARCHIVE: Final[str] = "%s/archive" % URL_NOTIFY
+URL_MESSAGES: Final[str] = "%s/messages/listing" % URL
+URL_MESSAGES_UNREAD: Final[str] = "%s/status/unread" % URL_MESSAGES
 URLS_LANGUAGES: Final[dict] = {
         "ru": "%s/user/lng/1" % URL,
         "en": "%s/user/lng/2" % URL,
