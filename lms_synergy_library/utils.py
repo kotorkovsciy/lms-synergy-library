@@ -209,3 +209,55 @@ class SoupLms:
             amount_pages: int = 1
 
         return amount_pages
+
+    @staticmethod
+    def get_amount_messages_from_soup(soup: bs, language: str) -> int:
+        """Returns amount messages from soup
+
+        :param soup: Soup
+        :param language: Language
+
+        :type soup: bs4.BeautifulSoup
+        :param language: Language
+
+        :return: Amount messages from soup
+        :rtype: int
+        """
+
+        titles: dict = {
+            "ru": "Личные сообщения",
+            "en": "Private messages",
+        }
+
+        amount_messages: str = soup.find("a", title=titles[language])
+
+        if amount_messages is None:
+            return 0
+
+        return int(clean_data.remove_many_spaces(amount_messages.text))
+
+    @staticmethod
+    def get_amount_notify_from_soup(soup: bs, language: str) -> int:
+        """Returns amount notifications from soup
+
+        :param soup: Soup
+        :param language: Language
+
+        :type soup: bs4.BeautifulSoup
+        :param language: Language
+
+        :return: Amount notifications from soup
+        :rtype: int
+        """
+
+        titles: dict = {
+            "ru": "Уведомления",
+            "en": "Notifications",
+        }
+
+        amount_notifications: str = soup.find("a", title=titles[language])
+
+        if amount_notifications is None:
+            return 0
+
+        return int(clean_data.remove_many_spaces(amount_notifications.text))

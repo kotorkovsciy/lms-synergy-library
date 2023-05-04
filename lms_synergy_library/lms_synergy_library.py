@@ -239,11 +239,6 @@ class LMS:
         0
         """
 
-        titles: dict = {
-            "ru": "Личные сообщения",
-            "en": "Private messages",
-        }
-
         soup: bs = SoupLms.get_soup_schedule(
             session=self.session,
             language=self.language,
@@ -251,12 +246,9 @@ class LMS:
             proxies=self.proxy
         )
 
-        amount_messages: str = soup.find("a", title=titles[self.language])
-
-        if amount_messages is None:
-            return 0
-
-        return int(clean_data.remove_many_spaces(amount_messages.text))
+        return SoupLms.get_amount_messages_from_soup(
+            soup, self.language
+        )
 
     def get_amount_notifications(self) -> int:
         """Returns amount notifications
@@ -272,11 +264,6 @@ class LMS:
         0
         """
 
-        titles: dict = {
-            "ru": "Уведомления",
-            "en": "Notifications",
-        }
-
         soup: bs = SoupLms.get_soup_schedule(
             session=self.session,
             language=self.language,
@@ -284,12 +271,9 @@ class LMS:
             proxies=self.proxy
         )
 
-        amount_notifications: str = soup.find("a", title=titles[self.language])
-
-        if amount_notifications is None:
-            return 0
-
-        return int(clean_data.remove_many_spaces(amount_notifications.text))
+        return SoupLms.get_amount_notify_from_soup(
+            soup, self.language
+        )
 
     def get_amount_unverified_work(self) -> int:
         """Returns amount unverified work
