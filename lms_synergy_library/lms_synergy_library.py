@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup as bs
 from fake_useragent import UserAgent
 from utils import clean_data, SoupLms
 from exceptions import LanguageNotFoundError, UserIsNotTeacherError, UserIsNotStudentError
-from constants import URL_LOGIN, URLS_LANGUAGES
+from constants import URL_LOGIN, URLS_LANGUAGES, URL
 from typing import Dict, List
 
 
@@ -861,6 +861,71 @@ class LMS:
                 )
 
         return notify_archive
+
+    def get_unread_messages(self) -> list:
+        """Returns unread messages
+
+        :return: unread messages
+        :rtype: list
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> unread_messages = lms.get_unread_messages()
+        >>> # unread_messages
+        >>> # [
+        >>> #   {
+        >>> #       "sender_name": "Sender_name",
+        >>> #       "subject": "Subject",
+        >>> #       "date": "Date",
+        >>> #       "url": "Url"
+        >>> #   },
+        >>> # ]
+        """
+
+        messages: list = []
+
+        amount_pages: int = SoupLms.get_amount_pages_messages_unread(
+            self.session, self.language, self.cookies, self.proxy
+        )
+
+        if amount_pages < 1:
+            return messages
+
+        for page in range(1, amount_pages):
+            soup: bs = SoupLms.get_soup_messages_unread(
+                session=self.session,
+                language=self.language,
+                cookies=self.cookies,
+                proxies=self.proxy,
+                page=page
+            )
+
+            table: bs = soup.find("table", {"class", "dataTable decorateTable table-list"})
+
+            for tr in table.find("tbody").find_all("tr"):
+                sender_name: str = clean_data.remove_many_spaces(
+                    tr.find_all("td")[1].text
+                )
+                subject: str = clean_data.remove_many_spaces(
+                    tr.find_all("td")[2].text
+                )
+                url: str = "%s%s" % (URL, tr.find_all("td")[2].find("a")["href"])
+                date: str = clean_data.remove_many_spaces(
+                    tr.find_all("td")[4].text
+                )
+
+                messages.append(
+                    {
+                        "sender_name": sender_name,
+                        "subject": subject,
+                        "date": date,
+                        "url": url
+                    }
+                )
+
+        return messages
 
 
 if __name__ == "__main__":
