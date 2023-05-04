@@ -51,6 +51,9 @@ lms.get_notify()
 # get notifications archive
 lms.get_notify_archive()
 
+# get unread messages
+lms.get_unread_messages()
+
 ```
 
 ## Contributing
