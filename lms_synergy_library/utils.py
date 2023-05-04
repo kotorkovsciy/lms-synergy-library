@@ -1,7 +1,7 @@
 from requests import Response, Session
 from bs4 import BeautifulSoup as bs
 from constants import URL_EDUCATION, URL_NEWS, URL_SCHEDULE, URLS_LANGUAGES, URL_NOTIFY,\
-     URL_NOTIFY_ARCHIVE
+     URL_NOTIFY_ARCHIVE, URL_MESSAGES_UNREAD, URL
 from exceptions import PageNotExist
 
 
@@ -261,3 +261,87 @@ class SoupLms:
             return 0
 
         return int(clean_data.remove_many_spaces(amount_notifications.text))
+
+    @staticmethod
+    def get_soup_messages_unread(session: Session, language: str, cookies: dict, proxies: dict, page: int = 1) -> bs:
+        """Return soup unread messages
+
+        :param session: Session
+        :param language: Language
+        :param cookies: Cookies
+        :param proxies: Proxies
+
+        :type session: Session
+        :type language: str
+        :type cookies: dict
+        :type proxies: dict
+
+        :return: Soup unread messages
+        :rtype: bs4.BeautifulSoup
+        """
+
+        if page < 1:
+            raise PageNotExist("Page does not exist: %s/page/%d" % (URL_MESSAGES_UNREAD, page))
+
+        session.get(URLS_LANGUAGES[language], cookies=cookies, proxies=proxies)
+
+        response: Response = session.get(
+            "%s/page/%d" % (URL_MESSAGES_UNREAD, page),
+            cookies=cookies,
+            proxies=proxies
+        )
+
+        return bs(response.text, "html.parser")
+
+    @classmethod
+    def get_amount_pages_messages_unread(cls, session: Session, language: str, cookies: dict, proxies: dict) -> int:
+        """Returns amount pages unread messages
+
+        :param session: Session
+        :param language: Language
+        :param cookies: Cookies
+        :param proxies: Proxies
+
+        :type session: Session
+        :type language: str
+        :type cookies: dict
+        :type proxies: dict
+
+        :return: Amount pages unread messages
+        :rtype: int
+        """
+
+        soup: bs = cls.get_soup_messages_unread(
+            session, language, cookies, proxies
+        )
+
+        amount_msg: int = cls.get_amount_messages_from_soup(
+            soup, language
+        )
+
+        if amount_msg < 1:
+            return 0
+
+        amount_pages: int = 1
+
+        paginator_links: bs = soup.select('.paginator a')
+
+        if not paginator_links:
+            return 1
+
+        next_link: str = "%s%s" % (URL, paginator_links[-1]["href"])
+        end_link: str = "%sjavascript:void(0);" % URL
+
+        while (next_link != end_link):
+            amount_pages += 1
+
+            response: Response = session.get(
+                "%s%s" % (URL, paginator_links[-1]["href"]),
+                cookies=cookies,
+                proxies=proxies
+            )
+            soup = bs(response.content, 'html.parser')
+            paginator_links: bs = soup.select('.paginator a')
+            next_link = "%s%s" % (URL, paginator_links[-1]["href"])
+
+        return amount_pages
