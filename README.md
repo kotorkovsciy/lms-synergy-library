@@ -30,6 +30,30 @@ lms.get_info()
 # get shedule
 lms.get_schedule()
 
+# get news
+lms.get_news()
+
+# get disciplines
+lms.get_disciplines()
+
+# get amount unverified work
+lms.get_amount_unverified_work()
+
+# get pesonal curators
+lms.get_pesonal_curators()
+
+# get tutors
+lms.get_tutors()
+
+# get notifications
+lms.get_notify()
+
+# get notifications archive
+lms.get_notify_archive()
+
+# get unread messages
+lms.get_unread_messages()
+
 ```
 
 ## Contributing
