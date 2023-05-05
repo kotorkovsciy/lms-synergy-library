@@ -10,7 +10,7 @@ $(VENV)/bin/activate: requirements.txt
 	$(PIP) install --upgrade build
 	$(PIP) install --upgrade twine
 
-build:
+build: $(VENV)/bin/activate
 	$(PYTHON) -m build
 
 release: build
