@@ -1,9 +1,9 @@
 from requests import Session
 from bs4 import BeautifulSoup as bs
 from fake_useragent import UserAgent
-from utils import clean_data, SoupLms
-from exceptions import LanguageNotFoundError, UserIsNotTeacherError, UserIsNotStudentError
-from constants import URL_LOGIN, URLS_LANGUAGES, URL
+from .utils import clean_data, SoupLms
+from .exceptions import LanguageNotFoundError, UserIsNotTeacherError, UserIsNotStudentError
+from .constants import URL_LOGIN, URLS_LANGUAGES, URL
 from typing import Dict, List
 
 

@@ -1,8 +1,8 @@
 from requests import Response, Session
 from bs4 import BeautifulSoup as bs
-from constants import URL_EDUCATION, URL_NEWS, URL_SCHEDULE, URLS_LANGUAGES, URL_NOTIFY,\
+from .constants import URL_EDUCATION, URL_NEWS, URL_SCHEDULE, URLS_LANGUAGES, URL_NOTIFY,\
      URL_NOTIFY_ARCHIVE, URL_MESSAGES_UNREAD, URL
-from exceptions import PageNotExist
+from .exceptions import PageNotExist
 
 
 class clean_data:
