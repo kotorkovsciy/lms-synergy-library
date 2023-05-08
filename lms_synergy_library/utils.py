@@ -1,7 +1,7 @@
 from requests import Response, Session
 from bs4 import BeautifulSoup as bs
 from .constants import URL_EDUCATION, URL_NEWS, URL_SCHEDULE, URLS_LANGUAGES, URL_NOTIFY,\
-     URL_NOTIFY_ARCHIVE, URL_MESSAGES_UNREAD, URL
+     URL_NOTIFY_ARCHIVE, URL_MESSAGES_UNREAD, URL, URL_JOURNAL
 from .exceptions import PageNotExist
 
 
@@ -345,3 +345,52 @@ class SoupLms:
             next_link = "%s%s" % (URL, paginator_links[-1]["href"])
 
         return amount_pages
+    
+    @staticmethod
+    def get_soup_journal(session: Session, language: str, cookies: dict, proxies: dict) -> bs:
+        """ Returns journal
+
+        :param session: Session
+        :param language: Language
+        :param cookies: Cookies
+        :param proxies: Proxies
+
+        :type session: Session
+        :type language: str
+        :type cookies: dict
+        :type proxies: dict
+
+        :return: Journal page
+        :rtype: bs4.BeautifulSoup
+        """
+        session.get(URLS_LANGUAGES[language], cookies=cookies, proxies=proxies)
+
+        response: Response = session.get(URL_JOURNAL, cookies=cookies, proxies=proxies)
+
+        return bs(response.text, "html.parser")
+    
+    @staticmethod
+    def get_soup_events(session: Session, language: str, cookies: dict, proxies: dict, url: str) -> bs:
+        """ Returns soup events
+
+        :param session: Session
+        :param language: Language
+        :param cookies: Cookies
+        :param proxies: Proxies
+        :param url: Url
+
+        :type session: Session
+        :type language: str
+        :type cookies: dict
+        :type proxies: dict
+        :type url: str
+
+        :return: Soup events
+        :rtype: bs4.BeautifulSoup
+        """
+        
+        session.get(URLS_LANGUAGES[language], cookies=cookies, proxies=proxies)
+
+        response: Response = session.get(url, cookies=cookies, proxies=proxies)
+
+        return bs(response.text, "html.parser")

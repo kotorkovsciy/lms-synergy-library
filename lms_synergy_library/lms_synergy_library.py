@@ -598,13 +598,18 @@ class LMS:
                 tr.find_all("td")[4].text
             )
             if finalGrade == "": finalGrade = "-"
+            
+            url: str = tr.find_all("td")[1].find("a")
+            if url: url = "%s%s" % (URL, url["href"])
+            else: url = "-"
 
             disciplines.append(
                 {
                     "title": title,
                     "typeOfControl": typeOfControl,
                     "currentScore": currentScore,
-                    "finalGrade": finalGrade
+                    "finalGrade": finalGrade,
+                    "url": url
                 }
             )
         
@@ -926,3 +931,145 @@ class LMS:
                 )
 
         return messages
+    
+    def get_marks(self) -> list:
+        """Returns marks
+
+        :return: marks
+        :rtype: list
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> marks = lms.get_marks()
+        >>> # marks
+        >>> # [
+        >>> #   {
+        >>> #       "discipline": "Discipline",
+        >>> #       "type_discipline": "Type_discipline",
+        >>> #       "teacher": "Teacher",
+        >>> #       "date_discipline": "Date_discipline",
+        >>> #       "time_discipline": "Time_discipline",
+        >>> #       "mark": "Mark",
+        >>> #       "hours": "Hours"
+        >>> #   },
+        >>> # ]
+        """
+
+        soup: bs = SoupLms.get_soup_journal(
+                session=self.session,
+                language=self.language,
+                cookies=self.cookies,
+                proxies=self.proxy,
+        )
+        
+        table: bs = soup.find("table", {"class": "table-list dataTable"})
+        marks: list = []
+
+        for tr in table.find_all("tr", {"id": "entryId"}):
+            if len(tr.find_all("td")) == 1:
+                return marks
+            else:
+                discipline: str = clean_data.remove_many_spaces(tr.find_all("td")[0].text)
+                type_discipline: str = clean_data.remove_many_spaces(tr.find_all("td")[1].text)
+                teacher: str = clean_data.remove_many_spaces(tr.find_all("td")[2].text)
+                date_discipline: str = clean_data.remove_many_spaces(tr.find_all("td")[3].text)
+                time_discipline: str = clean_data.remove_many_spaces(tr.find_all("td")[4].text)
+                mark: str = clean_data.remove_many_spaces(tr.find_all("td")[5].text)
+                hours: str = clean_data.remove_many_spaces(tr.find_all("td")[6].text)
+
+                marks.append(
+                    {
+                        "discipline": discipline,
+                        "type_discipline": type_discipline,
+                        "teacher": teacher,
+                        "date_discipline": date_discipline,
+                        "time_discipline": time_discipline,
+                        "mark": mark,
+                        "hours": hours
+                    }
+                )
+
+        return marks
+    
+    def get_events(self):
+        """Returns event
+
+        :return: event
+        :rtype: list
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> events = lms.get_events()
+        >>> # events
+        >>> # [
+        >>> #   {
+        >>> #       "discipline": {
+        >>> #               "current_grade": "Current_grade",
+        >>> #               "events": [
+        >>> #                           {
+        >>> #                               "name": "Name",
+        >>> #                               "access": "Access",
+        >>> #                               "max_grade": "Max_grade",
+        >>> #                               "result": "Result",
+        >>> #                               "url": "Url"
+        >>> #                           },
+        >>> #               ]
+        >>> #       },
+        >>> #   },       
+        >>> # ]
+        """
+
+        disciplines = self.get_disciplines()
+        info_disciplines = []
+
+        for discipline in disciplines:
+            if discipline["url"] == "-":
+                continue
+            soup: bs = SoupLms.get_soup_events(
+                session=self.session,
+                language=self.language,
+                cookies=self.cookies,
+                proxies=self.proxy,
+                url=discipline["url"]
+            )
+
+            table: bs = soup.find("table", {"class": "table-list"})
+            events: list = []
+
+            for tr in table.find("tbody").find_all("tr"):
+                if len(tr.find_all("td")) == 1:
+                    continue
+                name: str = clean_data.remove_many_spaces(tr.find_all("td")[0].text)
+                access: str = clean_data.remove_many_spaces(tr.find_all("td")[1].text)
+                max_grade: str = clean_data.remove_many_spaces(tr.find_all("td")[2].text)
+                result: str = clean_data.remove_many_spaces(tr.find_all("td")[3].text)
+                if result == "": result = "-"
+                url: str = tr.find_all("td")[0].find("a")
+                if url: url = "%s%s" % (URL, url["href"])
+                else: url = "-"
+
+                events.append(
+                    {
+                        "name": name,
+                        "access": access,
+                        "max_grade": max_grade,
+                        "result": result,
+                        "url": url
+                    }
+                )
+            
+            current_grade = table.find("tfoot").find_all("td")
+
+            info_disciplines.append(
+                {
+                    discipline["title"]: {
+                        "current_grade": clean_data.remove_many_spaces(current_grade[-1].text), 
+                        "events": events
+                    },
+                }
+            )
+        return info_disciplines
