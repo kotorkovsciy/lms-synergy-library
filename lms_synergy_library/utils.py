@@ -361,10 +361,36 @@ class SoupLms:
         :type proxies: dict
 
         :return: Journal page
-        :rtype: int
+        :rtype: bs4.BeautifulSoup
         """
         session.get(URLS_LANGUAGES[language], cookies=cookies, proxies=proxies)
 
         response: Response = session.get(URL_JOURNAL, cookies=cookies, proxies=proxies)
+
+        return bs(response.text, "html.parser")
+    
+    @staticmethod
+    def get_soup_events(session: Session, language: str, cookies: dict, proxies: dict, url: str) -> bs:
+        """ Returns soup events
+
+        :param session: Session
+        :param language: Language
+        :param cookies: Cookies
+        :param proxies: Proxies
+        :param url: Url
+
+        :type session: Session
+        :type language: str
+        :type cookies: dict
+        :type proxies: dict
+        :type url: str
+
+        :return: Soup events
+        :rtype: bs4.BeautifulSoup
+        """
+        
+        session.get(URLS_LANGUAGES[language], cookies=cookies, proxies=proxies)
+
+        response: Response = session.get(url, cookies=cookies, proxies=proxies)
 
         return bs(response.text, "html.parser")
