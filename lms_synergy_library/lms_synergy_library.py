@@ -926,3 +926,64 @@ class LMS:
                 )
 
         return messages
+    
+    def get_marks(self) -> list:
+        """Returns marks
+
+        :return: marks
+        :rtype: list
+
+        :Example:
+
+        >>> from lms_synergy_library import LMS
+        >>> lms = LMS(login="demo", password="demo")
+        >>> marks = lms.get_marks()
+        >>> # marks
+        >>> # [
+        >>> #   {
+        >>> #       "discipline": "Discipline",
+        >>> #       "type_discipline": "Type_discipline",
+        >>> #       "teacher": "Teacher",
+        >>> #       "date_discipline": "Date_discipline",
+        >>> #       "time_discipline": "Time_discipline",
+        >>> #       "mark": "Mark",
+        >>> #       "hours": "Hours"
+        >>> #   },
+        >>> # ]
+        """
+
+        soup: bs = SoupLms.get_soup_journal(
+                session=self.session,
+                language=self.language,
+                cookies=self.cookies,
+                proxies=self.proxy,
+        )
+        
+        table: bs = soup.find("table", {"class": "table-list dataTable"})
+        marks: list = []
+
+        for tr in table.find_all("tr", {"id": "entryId"}):
+            if len(tr.find_all("td")) == 1:
+                return marks
+            else:
+                discipline: str = clean_data.remove_many_spaces(tr.find_all("td")[0].text)
+                type_discipline: str = clean_data.remove_many_spaces(tr.find_all("td")[1].text)
+                teacher: str = clean_data.remove_many_spaces(tr.find_all("td")[2].text)
+                date_discipline: str = clean_data.remove_many_spaces(tr.find_all("td")[3].text)
+                time_discipline: str = clean_data.remove_many_spaces(tr.find_all("td")[4].text)
+                mark: str = clean_data.remove_many_spaces(tr.find_all("td")[5].text)
+                hours: str = clean_data.remove_many_spaces(tr.find_all("td")[6].text)
+                
+                marks.append(
+                    {
+                        "discipline": discipline,
+                        "type_discipline": type_discipline,
+                        "teacher": teacher,
+                        "date_discipline": date_discipline,
+                        "time_discipline": time_discipline,
+                        "mark": mark,
+                        "hours": hours
+                    }
+                )
+
+        return marks
